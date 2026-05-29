@@ -1,1 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI App Runner</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    
+    <style>
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f5f7; }
+        
+        /* 編輯器介面 */
+        #editor-view { display: flex; flex-direction: column; width: 100%; height: 100%; padding: 20px; box-sizing: border-box; }
+        h3 { margin-top: 10px; color: #333; }
+        textarea { flex: 1; width: 100%; margin-bottom: 15px; padding: 12px; border: 1px solid #d1d1d6; border-radius: 10px; font-family: monospace; font-size: 14px; box-sizing: border-box; resize: none; }
+        button { padding: 14px; background: #007aff; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+        button:active { background: #0056b3; }
+        
+        /* 預覽介面 */
+        #preview-view { display: none; width: 100%; height: 100%; position: relative; }
+        iframe { width: 100%; height: 100%; border: none; }
+        
+        /* 懸浮設定掣：等你可以隨時轉返出嚟貼新 Code */
+        #floating-btn { position: fixed; bottom: 20px; right: 20px; width: 44px; height: 44px; background: rgba(0, 122, 255, 0.8); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; z-index: 99999; backdrop-filter: blur(10px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); -webkit-tap-highlight-color: transparent; }
+    </style>
+</head>
+<body>
 
+    <div id="editor-view">
+        <h3>🚀 Paste AI HTML Code</h3>
+        <textarea id="html-input" placeholder="將 AI 生成嘅完整 HTML (連埋 <style> 和 <script>) 完整貼喺度..."></textarea>
+        <button onclick="saveAndRun()">儲存並即時運行</button>
+    </div>
+    
+    <div id="preview-view">
+        <iframe id="preview-frame" allow="clipboard-read; clipboard-write; geolocation; microphone; camera;"></iframe>
+        <div id="floating-btn" onclick="toggleView()">⚙️</div>
+    </div>
+
+    <script>
+        const editorView = document.getElementById('editor-view');
+        const previewView = document.getElementById('preview-view');
+        const htmlInput = document.getElementById('html-input');
+        const previewFrame = document.getElementById('preview-frame');
+
+        // App 開啟時：檢查之前有無儲存過舊 Code
+        window.onload = function() {
+            const savedCode = localStorage.getItem('running_app_code');
+            if (savedCode) {
+                htmlInput.value = savedCode;
+                renderApp(savedCode);
+            }
+        };
+
+        // 將 Code 塞入 iframe 運行
+        function renderApp(code) {
+            previewFrame.srcdoc = code;
+            editorView.style.display = 'none';
+            previewView.style.display = 'block';
+        }
+
+        // 儲存並運行
+        function saveAndRun() {
+            const code = htmlInput.value;
+            if (!code.trim()) {
+                alert('請先貼上 HTML Code！');
+                return;
+            }
+            localStorage.setItem('running_app_code', code);
+            renderApp(code);
+        }
+
+        // 切換編輯器 / 運行畫面
+        function toggleView() {
+            if (editorView.style.display === 'none') {
+                editorView.style.display = 'flex';
+                previewView.style.display = 'none';
+            } else {
+                if (localStorage.getItem('running_app_code')) {
+                    editorView.style.display = 'none';
+                    previewView.style.display = 'block';
+                }
+            }
+        }
+    </script>
+</body>
+</html>
